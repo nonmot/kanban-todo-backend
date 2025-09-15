@@ -1,4 +1,4 @@
-import { User, PrismaClient } from '@prisma/client';
+import { PrismaClient, User, Status } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
@@ -14,6 +14,21 @@ async function generateUser(user: Pick<User, 'email' | 'name' | 'password'>) {
   });
 
   console.log({ newUser });
+  return newUser;
+}
+
+async function generateTodos(user: User) {
+  await prisma.$transaction([
+    prisma.todo.create({
+      data: { title: "Task 1", content: "Content of Task 1", deadline: new Date(Date.now()), authorId: user.id, status: Status.TODO },
+    }),
+    prisma.todo.create({
+      data: { title: "Task 2", content: "Content of Task 2", deadline: new Date(Date.now()), authorId: user.id, status: Status.IN_PROGRESS},
+    }),
+    prisma.todo.create({
+      data: { title: "Task 3", content: "Content of Task 3", deadline: new Date(Date.now()), authorId: user.id, status: Status.COMPLETED},
+    }),
+  ]);
 }
 
 async function main() {
@@ -33,7 +48,10 @@ async function main() {
     }
   ];
 
-  users.forEach(user => generateUser(user));
+  for (const user of users) {
+    const newUser = await generateUser(user);
+    await generateTodos(newUser);
+  }
 }
 
 main()
