@@ -31,7 +31,8 @@ import prisma from '../lib/prisma';
      const user = await prisma.user.findUnique({
        where: {
          id,
-       }
+       },
+       select: { id: true, name: true, email: true },
      });
      return res.status(200).json(user);
    } catch (error) {
