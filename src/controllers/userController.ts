@@ -1,17 +1,12 @@
 import { Request, Response, NextFunction } from 'express';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import prisma from '../lib/prisma';
 
  export const createUser = async (req: Request, res: Response, next: NextFunction) => {
    try {
      const { name, email, password } = req.body;
      const newUser = await prisma.user.create({
-       data: {
-         name,
-         email,
-         password,
-       },
+       data: { name, email, password },
+       select: { id: true, name: true, email: true, createdAt: true, updatedAt: true }
      });
      res.status(200).json(newUser);
    } catch (error) {
@@ -21,7 +16,9 @@ const prisma = new PrismaClient();
 
  export const getUsers = async (_req: Request, res: Response, next: NextFunction) => {
    try {
-      const users = await prisma.user.findMany();
+      const users = await prisma.user.findMany({
+        select: { id: true, name: true, email: true }
+      });
       return res.status(200).json(users);
    } catch (error) {
      next(error);
@@ -34,7 +31,8 @@ const prisma = new PrismaClient();
      const user = await prisma.user.findUnique({
        where: {
          id,
-       }
+       },
+       select: { id: true, name: true, email: true },
      });
      return res.status(200).json(user);
    } catch (error) {
@@ -70,6 +68,7 @@ const prisma = new PrismaClient();
         where: {
           id,
         },
+        select: { id: true, name: true, email: true },
       });
       return res.status(200).json(user);
    } catch (error) {

@@ -1,6 +1,5 @@
 import { PrismaClient, User, Status } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import prisma from '../src/lib/prisma';
 
 async function generateUser(user: Pick<User, 'email' | 'name' | 'password'>) {
   const newUser = await prisma.user.upsert({
@@ -33,6 +32,7 @@ async function generateTodos(user: User) {
 
 async function main() {
 
+  await prisma.todo.deleteMany();
   await prisma.user.deleteMany();
 
   const users = [
